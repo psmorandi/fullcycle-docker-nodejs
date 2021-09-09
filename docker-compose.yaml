@@ -1,0 +1,48 @@
+version: '3.7'
+
+services:
+  app:
+    build:
+      context: ./nodejs
+      dockerfile: Dockerfile.prod
+    image: psmorandi/nodejs-fullcycle
+    entrypoint: dockerize -wait tcp://mysql:3306 -timeout 120s ./entrypoint.sh
+    container_name: app    
+    networks: 
+      - nodejs-bridge
+    depends_on: 
+      - mysql
+
+  nginx:
+    restart: always
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.prod
+    image: psmorandi/nginx-fullcycle
+    container_name: nginx 
+    ports:
+      - "8080:80"
+    networks: 
+      - nodejs-bridge
+    depends_on: 
+      - app
+
+  mysql:
+    restart: always
+    container_name: mysql
+    image: mysql:8
+    command: --default-authentication-plugin=mysql_native_password   
+    tty: true 
+    environment:
+      MYSQL_USER: nodejs
+      MYSQL_PASSWORD: adm123
+      MYSQL_ROOT_PASSWORD: adm123
+      MYSQL_DATABASE: nodejsdb
+    volumes: 
+      - ./mysql:/var/lib/mysql
+    networks: 
+      - nodejs-bridge
+
+networks: 
+  nodejs-bridge:
+    driver: bridge
