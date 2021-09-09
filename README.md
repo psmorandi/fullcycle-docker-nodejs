@@ -5,3 +5,5 @@ Para executar:
 ```
 docker-compose up -d
 ```
+
+Servidor estará disponível no endereço ```http://localhost:8080/```.
